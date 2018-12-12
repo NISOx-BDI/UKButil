@@ -22,6 +22,11 @@ if [ "$UKB_SUBJECTS" == "" ] ; then
     exit 1
 fi
 
+if [ "$FSLDIR" == "" ] ; then
+    echo "ERROR: No FSL!"
+    exit 1
+fi
+
 # Make sure no trailing slash
 UKB_SUBJECTS=${UKB_SUBJECTS%/}
 
@@ -139,7 +144,7 @@ nSubj=$(cat $SubjIds | wc -l)
 
 SrcDir="$UKB_SUBJECTS"
 
-FeatFile="$(remove_ext $1)"
+FeatFile="${1%.nii.gz}"
 DestDir="$2"
 JobFile="$3"
 
@@ -147,16 +152,15 @@ touch "$JobFile"
 
 for ((i=1;i<=nSubj;i++)) ; do 
 
-    Subj=$(sed -n ${i}p ${Tmp}SubjId)
+    Subj=$(sed -n ${i}p $SubjIds)
 
     if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/"$FeatFile".nii.gz ] ; then
         if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/reg/example_func2standard_warp.nii.gz ] ; then
 		
 		ApplyWarpJob "$SrcDir" "$Subj" "$FeatFile" "$Interp" "$DestDir" >> "$JobFile"
 
-	    fi
 	fi
-    done
+    fi
 		
 done
 
