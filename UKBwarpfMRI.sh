@@ -17,11 +17,13 @@ shopt -s nullglob # No-match globbing expands to null
 Tmp=/tmp/`basename $0`-${$}-
 trap CleanUp INT
 
-# Lists of subject ID's and corresponding base directories
-dirSubjLists=("/vols/Scratch/ukbiobank/nichols/subj1.txt" \
-              "/vols/Scratch/ukbiobank/nichols/subj2.txt" )
-dirSubjs=( "/vols/Data/ukbiobank/FMRIB/IMAGING/data3/subjects" \
-           "/vols/Data/ukbiobank/FMRIB/IMAGING/data3/subjects2" )
+if [ "$UKB_SUBJECTS" == "" ] ; then
+    echo "ERROR: UKB_SUBJECTS not defined."
+    exit 1
+fi
+
+# Make sure no trailing slash
+UKB_SUBJECTS=${UKB_SUBJECTS%/}
 
 # Default interpolation
 Interp="spline"
@@ -34,21 +36,22 @@ Interp="spline"
 
 Usage() {
 cat <<EOF
-Usage: `basename $0` [options] <FeatFile> <DestDir> <JobFile>
+Usage: `basename $0` [options] <FeatImg> <DestDir> <JobFile>
 
 Creates a job file, to be used with fsl_sub -t, to convert UK Biobank task fMRI 
 from subject-space to MNI space.
 
+   FeatImg   File in a feat directory; e.g. mask or stats/cope1
    DestDir   Location of where MNI space files should be put; files named:
                    XXXXXX_fMRI_<FeatFileNm>_MNI
-             where FeatFileNm is FeatFile with any directory removed.
+             where FeatFileNm is FeatImg with any directory removed.
    JobFile   Text file with one applywarp command per line.
-   FeatFile  File in a feat directory; e.g. mask or stats/cope1
-             (do not include an extension)
 
 Options
    -i <Interp>   Specify interpolation. Default is "spline"; use "nn" for 
                  masks.
+   -s Subj.txt   Specify subjects (instead of all possible); Subj.txt is text 
+                 file, one Id per line.
 _________________________________________________________________________
 Version 1.0
 EOF
@@ -65,6 +68,7 @@ ApplyWarpJob() {
   local Subj="$2"
   local FeatFile="$3"
   local Interp="$4"
+  local DestDir="$5"
 
   local FileNm="$(basename "$FeatFile")"
 
@@ -92,6 +96,11 @@ while (( $# > 1 )) ; do
 	    Interp="$1"
 	    shift
             ;;
+        "-s")
+            shift
+	    SubjIds="$1" 
+	    shift
+            ;;
         -*)
             echo "ERROR: Unknown option '$1'"
             exit 1
@@ -107,21 +116,43 @@ if (( $# != 3 )) ; then
     Usage
 fi
 
-FeatFile="$1"
+
+if [ "$SubjIds" == "" ] ; then
+
+    SubjIds=${Tmp}SubjId
+
+    # find all subjects with task fMRI
+    find -L "$UKB_SUBJECTS" \
+	-maxdepth 3 \
+	\! -readable -prune -o \
+	-path "*/fMRI/tfMRI.feat" -print \
+	| sed "s@${UKB_SUBJECTS}/@@;s@/fMRI/tfMRI.feat@@" \
+	> $SubjIds
+    # When generalising to other filters:
+    #    For a filter "*/fMRI/tfMRI.feat" also set maxdepth to correspond to the 
+    #    depth of the filter  (this isn't vital, but speeds it up dramatically.
+
+
+fi
+
+nSubj=$(cat $SubjIds | wc -l)
+
+SrcDir="$UKB_SUBJECTS"
+
+FeatFile="$(remove_ext $1)"
 DestDir="$2"
 JobFile="$3"
 
 touch "$JobFile"
 
-for ((i==0;i<${#dirSubjs[*]};i++)) ; do 
-    SrcDir=${dirSubjs[i]}
-    SrcList=${dirSubjLists[i]}
+for ((i=1;i<=nSubj;i++)) ; do 
 
-    for Subj in `cat $SrcList` ; do
-	if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/"$FeatFile".nii.gz ] ; then
-            if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/reg/example_func2standard_warp.nii.gz ] ; then
+    Subj=$(sed -n ${i}p ${Tmp}SubjId)
+
+    if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/"$FeatFile".nii.gz ] ; then
+        if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/reg/example_func2standard_warp.nii.gz ] ; then
 		
-		ApplyWarpJob "$SrcDir" "$Subj" "$FeatFile" "$Interp" >> "$JobFile"
+		ApplyWarpJob "$SrcDir" "$Subj" "$FeatFile" "$Interp" "$DestDir" >> "$JobFile"
 
 	    fi
 	fi
