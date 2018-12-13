@@ -57,6 +57,9 @@ Options
                  masks.
    -s Subj.txt   Specify subjects (instead of all possible); Subj.txt is text 
                  file, one Id per line.
+   -S SubjUsed.txt
+                 Search for all possible subjects (as by default) but write 
+                 out list of ID's to SubjUsed.txt; saves time on subsequent runs.
 _________________________________________________________________________
 Version 1.0
 EOF
@@ -106,6 +109,11 @@ while (( $# > 1 )) ; do
 	    SubjIds="$1" 
 	    shift
             ;;
+        "-S")
+            shift
+	    SubjIdsSv="$1" 
+	    shift
+            ;;
         -*)
             echo "ERROR: Unknown option '$1'"
             exit 1
@@ -137,6 +145,9 @@ if [ "$SubjIds" == "" ] ; then
     #    For a filter "*/fMRI/tfMRI.feat" also set maxdepth to correspond to the 
     #    depth of the filter  (this isn't vital, but speeds it up dramatically.
 
+    if [ "$SubjIdsSv" != "" ] ; then
+	cp "$SubjIds" "$SubjIdsSv"
+    fi
 
 fi
 
