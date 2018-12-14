@@ -48,7 +48,7 @@ from subject-space to MNI space.
 
    FeatImg   File in a feat directory; e.g. mask or stats/cope1
    DestDir   Location of where MNI space files should be put; files named:
-                   XXXXXX_fMRI_<FeatFileNm>_MNI
+                   XXXXXX_tfMRI_<FeatFileNm>_MNI
              where FeatFileNm is FeatImg with any directory removed.
    JobFile   Text file with one applywarp command per line.
 
@@ -83,7 +83,7 @@ ApplyWarpJob() {
   echo applywarp \
       -i $SrcDir/$Subj/fMRI/tfMRI.feat/"$FeatFile" \
       -r $FSLDIR/data/standard/MNI152_T1_2mm \
-      -o "$DestDir"/${Subj}_fMRI_"${FileNm}"_MNI \
+      -o "$DestDir"/${Subj}_tfMRI_"${FileNm}"_MNI \
       -w $SrcDir/$Subj/fMRI/tfMRI.feat/reg/example_func2standard_warp \
       --interp="$Interp"
 }
