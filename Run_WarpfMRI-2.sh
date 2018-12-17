@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # 
 # "Run" script to warp task fMRI images to MNI space, part 2
 #
@@ -38,24 +38,24 @@ fi
 
 # Manually create a one-sample t-test... ignoring missing... only correct where there's no missingness
 if true ; then
-    fslmaths $FSLDIR/data/standard/MNI152_T1_2mm -mul 0 fMRI_mask_MNI_mean
-    fslmaths fMRI_mask_MNI_mean fMRI_mask_MNI_std
+    fslmaths $FSLDIR/data/standard/MNI152_T1_2mm -mul 0 fMRI_cope1_MNI_mean
+    fslmaths fMRI_cope1_MNI_mean fMRI_cope1_MNI_std
     ((i=0))
-    for f in [0-9]*mask* ; do 
-	echo $i
-	fslmaths $f      -add fMRI_mask_MNI_mean fMRI_mask_MNI_mean
-	fslmaths $f -sqr -add fMRI_mask_MNI_std  fMRI_mask_MNI_std
-	((i++))
+    for f in [0-9]*cope1* ; do 
+    	echo $i
+    	fslmaths $f      -add fMRI_cope1_MNI_mean fMRI_cope1_MNI_mean
+    	fslmaths $f -sqr -add fMRI_cope1_MNI_std  fMRI_cope1_MNI_std
+    	((i++))
     done
-    fslmaths fMRI_mask_MNI_mean -div $i fMRI_mask_MNI_mean
-    fslmaths fMRI_mask_MNI_std -div $i fMRI_mask_MNI_std
-    fslmaths fMRI_mask_MNI_mean -sqr -mul -1 -add fMRI_mask_MNI_std -sqrt fMRI_mask_MNI_std
-    fslmaths fMRI_mask_MNI_mean -div fMRI_mask_MNI_std -mul $(echo "sqrt($i)|bc -l") fMRI_mask_MNI_tstat
+    fslmaths fMRI_cope1_MNI_mean -div $i fMRI_cope1_MNI_mean
+    fslmaths fMRI_cope1_MNI_std  -div $i fMRI_cope1_MNI_std   #  variance here
+    fslmaths fMRI_cope1_MNI_mean -sqr -mul -1 -add fMRI_cope1_MNI_std -sqrt fMRI_cope1_MNI_std
+    fslmaths fMRI_cope1_MNI_mean -div fMRI_cope1_MNI_std -mul $(echo "sqrt($i)"|bc -l) fMRI_cope1_MNI_tstat
 
-    gzip fMRI_mask_MNI_{mean,std,tstat}.nii
+    gzip fMRI_cope1_MNI_{mean,std,tstat}.nii
     
-    immv fMRI_mask_MNI_mean fMRI_mask_MNI_mean-${i}
-    immv fMRI_mask_MNI_std fMRI_mask_MNI_std-${i}
-    immv fMRI_mask_MNI_tstat fMRI_mask_MNI_tstat-${i}
+    mv fMRI_cope1_MNI_mean.nii.gz fMRI_cope1_MNI_mean-${i}.nii.gz
+    mv fMRI_cope1_MNI_std.nii.gz fMRI_cope1_MNI_std-${i}.nii.gz
+    mv fMRI_cope1_MNI_tstat.nii.gz fMRI_cope1_MNI_tstat-${i}.nii.gz
 fi
 
