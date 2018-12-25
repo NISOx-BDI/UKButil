@@ -96,12 +96,12 @@ fi
 #
 ###############################################################################
 
-nCat=$(head -1 "$In" | awk -F\t '{print NF-2}')
+nCat=$(head -1 "$In" | awk -F'\t' '{print NF-2}')
 echo "Found $nCat categorisations"
 
 for ((Col=3;Col<3+nCat;Col++)) ; do 
 
-    Name=$(awk -F\t '(NR==1){print $'$Col'}' "$In")
+    Name=$(awk -F'\t' '(NR==1){print $'$Col'}' "$In")
 
     echo "${Name//\"/}..."
 
@@ -109,13 +109,13 @@ for ((Col=3;Col<3+nCat;Col++)) ; do
 
     echo "ID	Category	Variables" > "$Out"
 
-    awk -F\t '(NR>1)&&($'$Col'!=""){print $'$Col'}' "$In" | sort | sed 's/"//g' | uniq > $Tmp
+    awk -F'\t' '(NR>1)&&($'$Col'!=""){print $'$Col'}' "$In" | sort | sed 's/"//g' | uniq > $Tmp
     Ncat=$(cat $Tmp | wc -l)
 
     for ((i=1;i<=Ncat;i++)) ; do
 	Cat=$(sed -n ${i}p $Tmp)
 	echo -n "${i}	${Cat}	" >> "$Out"
-	awk -F\t '($'$Col'=="\"'"$Cat"'\""){if(First==0){printf("%d",$1);First++}else{printf(",%d",$1)}}' "$In" >> "$Out"
+	awk -F'\t' '($'$Col'=="\"'"$Cat"'\""){if(First==0){printf("%d",$1);First++}else{printf(",%d",$1)}}' "$In" >> "$Out"
 	echo >> "$Out"
     done
 
