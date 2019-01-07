@@ -1,4 +1,5 @@
 #!/bin/bash -x
+# Outline draft of a script to scrape UKB for list of all field IDs seen at the showcase
 
 URL=(\
      'http://biobank.ctsu.ox.ac.uk/crystal/list.cgi?it=0&vt=11' \
