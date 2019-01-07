@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # 
 # "Run" script to warp task fMRI images to MNI space, part 2
 #
@@ -43,8 +43,8 @@ if true ; then
     ((i=0))
     for f in [0-9]*cope1* ; do 
     	echo $i
-    	fslmaths $f      -add fMRI_cope1_MNI_mean fMRI_cope1_MNI_mean
-    	fslmaths $f -sqr -add fMRI_cope1_MNI_std  fMRI_cope1_MNI_std
+    	fslmaths $f -mas ${f/cope1/mask}      -add fMRI_cope1_MNI_mean fMRI_cope1_MNI_mean
+    	fslmaths $f -mas ${f/cope1/mask} -sqr -add fMRI_cope1_MNI_std  fMRI_cope1_MNI_std
     	((i++))
     done
     fslmaths fMRI_cope1_MNI_mean -div $i fMRI_cope1_MNI_mean

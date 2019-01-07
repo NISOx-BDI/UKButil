@@ -8,7 +8,7 @@
 module add fsl
 module add fsl_sub
 
-cd /users/nichols/kfh142/group/scripts
+cd /well/nichols/scripts
 
 UKButil=/well/nichols/scripts/UKButil
 Dest=/well/nichols/projects/UKB/MNI
