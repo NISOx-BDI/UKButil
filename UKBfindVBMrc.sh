@@ -1,5 +1,6 @@
 #!/bin/bash
 
+dirSubjImg="${UKB_SMS}/FN-eid8107_VBM-6k.txt"
 dirSubjIDsSS="${UKB_SMS}/IDs-eid8107_VBM-6k.txt"
 dirSubjIDsTN="${UKB_SMS}/IDs-eid34077_VBM-6k.txt"
 dirSubjs="${UKB_SUBJECTS}/subjects4"
@@ -12,8 +13,10 @@ find -L . \
     \! -readable -prune -o \
     -path '*/T2*' -prune -o \
     -path '*/[lfSdIQ]*' -prune -o \
-    -path "*/T1/T1_vbm/T1_GM_to_template_GM_mod.nii.gz" -print | \
-    awk -F/ '{print $2}' > ${dirSubjIDsSS}
+    -path "*/T1/T1_vbm/T1_GM_to_template_GM_mod.nii.gz" -print > \
+    ${dirSubjImg}
+
+awk -F/ '{print $2}' ${dirSubjImg} > ${dirSubjIDsSS}
 
 # Create temp briding file just for these subjects
 ukbparse --no_builtins --overwrite \
