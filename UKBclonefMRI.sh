@@ -70,7 +70,8 @@ ReplTemplate() {
   local OutFsf="$DestDir"/"$Subj"/fMRI/tfMRI.fsf
 
   sed s%@@SubjDir@@%"$SrcDir"/"$Subj"%';'s%@@OutDir@@%"$OutDir"% "$Template" > "$OutFsf"
-  echo feat "$OutFsf"
+  echo /vols/Scratch/ukbiobank/nichols/SCRIPTS/feat_then_clean.sh "$OutFsf"
+
 }
 
 
@@ -122,6 +123,7 @@ for ((i==0;i<${#dirSubjs[*]};i++)) ; do
 	    ReplTemplate "$SrcDir" "$Subj" "$DestDir" "$FeatTemplate" >> "$JobFile"
 
 	fi
+	
     done
     
 done
