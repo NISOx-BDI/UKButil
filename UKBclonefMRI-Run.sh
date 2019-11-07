@@ -2,5 +2,5 @@
 
 Base=/vols/Scratch/ukbiobank/nichols
 
-$Base/SCRIPTS/UKBclonefMRI.sh -t $Base/TEMPLATES/tfMRI_template-0sm.fsf \
-    $Base/ReProc $Base/SCRIPTS/ReProcAll.txt
+$Base/SCRIPTS/UKButil/UKBclonefMRI.sh -t $Base/TEMPLATES/tfMRI_template-0sm.fsf \
+    $Base/ReProc0sm $Base/SCRIPTS/ReProcAll.txt
