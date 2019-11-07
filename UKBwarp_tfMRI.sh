@@ -17,18 +17,11 @@ shopt -s nullglob # No-match globbing expands to null
 Tmp=/tmp/`basename $0`-${$}-
 trap CleanUp INT
 
-if [ "$UKB_SUBJECTS" == "" ] ; then
-    echo "ERROR: UKB_SUBJECTS not defined."
-    exit 1
-fi
-
 if [ "$FSLDIR" == "" ] ; then
     echo "ERROR: No FSL!"
     exit 1
 fi
 
-# Make sure no trailing slash
-UKB_SUBJECTS=${UKB_SUBJECTS%/}
 
 # Default interpolation
 Interp="spline"
@@ -60,6 +53,8 @@ Options
    -S SubjUsed.txt
                  Search for all possible subjects (as by default) but write 
                  out list of ID's to SubjUsed.txt; saves time on subsequent runs.
+   -d SrcDir     Source directory where UKB image data is found; defaults to 
+                 $UKB_SUBJECTS
 _________________________________________________________________________
 Version 1.0
 EOF
@@ -114,6 +109,11 @@ while (( $# > 1 )) ; do
 	    SubjIdsSv="$1" 
 	    shift
             ;;
+        "-d")
+            shift
+	    SrcDir="$1" 
+	    shift
+            ;;
         -*)
             echo "ERROR: Unknown option '$1'"
             exit 1
@@ -125,6 +125,18 @@ while (( $# > 1 )) ; do
     esac
 done
 
+if [ "$SrcDir" == "" ] ; then
+    if [ "$UKB_SUBJECTS" == "" ] ; then
+	echo "ERROR: UKB_SUBJECTS not defined & SrcDir not set with -d"
+	exit 1
+    fi
+    SrcDir="$UKB_SUBJECTS"    
+fi
+
+# Make sure no trailing slash
+SrcDir="${SrcDir%/}"
+
+
 if (( $# != 3 )) ; then
     Usage
 fi
@@ -135,11 +147,11 @@ if [ "$SubjIds" == "" ] ; then
     SubjIds=${Tmp}SubjId
 
     # find all subjects with task fMRI
-    find -L "$UKB_SUBJECTS" \
+    find -L "$SrcDir" \
 	-maxdepth 3 \
 	\! -readable -prune -o \
 	-path "*/fMRI/tfMRI.feat" -print \
-	| sed "s@${UKB_SUBJECTS}/@@;s@/fMRI/tfMRI.feat@@" \
+	| sed "s@${SrcDir}/@@;s@/fMRI/tfMRI.feat@@" \
 	> $SubjIds
     # When generalising to other filters:
     #    For a filter "*/fMRI/tfMRI.feat" also set maxdepth to correspond to the 
@@ -152,8 +164,6 @@ if [ "$SubjIds" == "" ] ; then
 fi
 
 nSubj=$(cat $SubjIds | wc -l)
-
-SrcDir="$UKB_SUBJECTS"
 
 FeatFile="${1%.nii.gz}"
 DestDir="$2"
