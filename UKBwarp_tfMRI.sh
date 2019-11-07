@@ -125,6 +125,10 @@ while (( $# > 1 )) ; do
     esac
 done
 
+if (( $# != 3 )) ; then
+    Usage
+fi
+
 if [ "$SrcDir" == "" ] ; then
     if [ "$UKB_SUBJECTS" == "" ] ; then
 	echo "ERROR: UKB_SUBJECTS not defined & SrcDir not set with -d"
@@ -132,14 +136,8 @@ if [ "$SrcDir" == "" ] ; then
     fi
     SrcDir="$UKB_SUBJECTS"    
 fi
-
 # Make sure no trailing slash
 SrcDir="${SrcDir%/}"
-
-
-if (( $# != 3 )) ; then
-    Usage
-fi
 
 
 if [ "$SubjIds" == "" ] ; then
