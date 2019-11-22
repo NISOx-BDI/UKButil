@@ -65,11 +65,12 @@ ReplTemplate() {
   local Subj="$2"
   local DestDir="$3"
   local Template="$4"
+  local Npts="$5"
 
   local OutDir="$DestDir"/"$Subj"/fMRI/tfMRI.feat
   local OutFsf="$DestDir"/"$Subj"/fMRI/tfMRI.fsf
 
-  sed s%@@SubjDir@@%"$SrcDir"/"$Subj"%';'s%@@OutDir@@%"$OutDir"% "$Template" > "$OutFsf"
+  sed s%@@SubjDir@@%"$SrcDir"/"$Subj"%';'s%@@OutDir@@%"$OutDir"%';'"s/@@Npts@@/$Npts/" "$Template" > "$OutFsf"
   echo /vols/Scratch/ukbiobank/nichols/SCRIPTS/feat_then_clean.sh "$OutFsf"
 
 }
@@ -119,8 +120,10 @@ for ((i==0;i<${#dirSubjs[*]};i++)) ; do
 	if [ -f $SrcDir/$Subj/fMRI/tfMRI.fsf ] ; then
 	    echo -n "$Subj "
 	    
+	    Npts=$(grep npts $SrcDir/$Subj/fMRI/tfMRI.fsf | tail -1 | awk '{print $3}')
+
 	    mkdir -p $DestDir/$Subj/fMRI
-	    ReplTemplate "$SrcDir" "$Subj" "$DestDir" "$FeatTemplate" >> "$JobFile"
+	    ReplTemplate "$SrcDir" "$Subj" "$DestDir" "$FeatTemplate" "$Npts" >> "$JobFile"
 
 	fi
 	
