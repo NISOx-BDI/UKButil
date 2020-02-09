@@ -18,10 +18,8 @@ Tmp=/tmp/`basename $0`-${$}-
 trap CleanUp INT
 
 # Lists of subject ID's and corresponding base directories
-dirSubjLists=("/vols/Scratch/ukbiobank/nichols/subj1.txt" \
-              "/vols/Scratch/ukbiobank/nichols/subj2.txt" )
-dirSubjs=( "/vols/Data/ukbiobank/FMRIB/IMAGING/data3/subjects" \
-           "/vols/Data/ukbiobank/FMRIB/IMAGING/data3/subjects2" )
+dirSubjLists=("/vols/Scratch/ukbiobank/nichols/subj_all.txt")
+dirSubjs=( "/vols/Scratch/ukbiobank/FMRIB/IMAGING/data3/SubjectsAll" )
 
 # Template Feat file; @@SubjDir@@ is to be replaced with subject dir,
 # @@OutDir@@ with output directory
