@@ -17,15 +17,18 @@ shopt -s nullglob # No-match globbing expands to null
 Tmp=/tmp/`basename $0`-${$}-
 trap CleanUp INT
 
-# Lists of subject ID's and corresponding base directories
-dirSubjLists=("/vols/Scratch/ukbiobank/nichols/subj_all.txt")
-dirSubjs=( "/vols/Scratch/ukbiobank/FMRIB/IMAGING/data3/SubjectsAll" )
+# Check for essential env var
+if [[ "$FSLDIR" == "" || "$UKB_SMS" == "" ||  "$UKB_SUBJECTS" == "" ||  "$UKB_SCRIPTS" == "" ]] ; then
+    echo "ERROR: Key env vars, FSLDIR, UKB_SMS, UKB_SUBJECTS and UKB_SCRIPTS not all set"
+    exit 1
+fi
 
 # Template Feat file; @@SubjDir@@ is to be replaced with subject dir,
 # @@OutDir@@ with output directory
 FeatTemplate="/vols/Scratch/ukbiobank/nichols/TEMPLATES/tfMRI_template.fsf"
 
-
+# Which data, Task? (0= rest)
+UseTask=1
 
 ###############################################################################
 #
@@ -35,18 +38,24 @@ FeatTemplate="/vols/Scratch/ukbiobank/nichols/TEMPLATES/tfMRI_template.fsf"
 
 Usage() {
 cat <<EOF
-Usage: `basename $0` [options] <DestDir> <JobFile>
+Usage: `basename $0` [options] <SubjId> <DestDir> <JobFile>
 
 Creates a job file, to be used with fsl_sub -t, to convert UK Biobank task fMRI 
 from subject-space to MNI space.
 
-   DestDir   Location of root under which to create results in the formwhere MNI space files should be put; files named:
+   SubjId    Plain text file listing the subject Ids to consider (each will
+             be  checked to confirm availablity of data).
+   DestDir   Location of root under which to create results in the from 
+             where MNI space files should be put; files created will be named:
                    XXXXXX/fMRI/tfMRI.{fsf,feat}
    JobFile   Text file with one applywarp command per line.
 
 Options
    -t Template   Template feat file; by default it is:
                  $FeatTemplate
+   -r            Use resting data not task data, for when doing 'resting 
+                 as task' analyses.
+
 _________________________________________________________________________
 Version 1.0
 EOF
@@ -64,12 +73,14 @@ ReplTemplate() {
   local DestDir="$3"
   local Template="$4"
   local Npts="$5"
+  local ImgData="$6"
 
   local OutDir="$DestDir"/"$Subj"/fMRI/tfMRI.feat
   local OutFsf="$DestDir"/"$Subj"/fMRI/tfMRI.fsf
 
-  sed s%@@SubjDir@@%"$SrcDir"/"$Subj"%';'s%@@OutDir@@%"$OutDir"%';'"s/@@Npts@@/$Npts/" "$Template" > "$OutFsf"
-  echo /vols/Scratch/ukbiobank/nichols/SCRIPTS/feat_then_clean.sh "$OutFsf"
+  sed "s@/tfMRI@/${ImgData}@;s%@@SubjDir@@%$SrcDir"/"$Subj"%';'s%@@OutDir@@%"$OutDir"%';'"s/@@Npts@@/$Npts/" "$Template" > "$OutFsf"
+  
+  echo $UKB_SCRIPTS/UKButil/feat_then_clean.sh "$OutFsf"
 
 }
 
@@ -90,6 +101,10 @@ while (( $# > 1 )) ; do
 	    FeatTemplate="$1"
 	    shift
             ;;
+        "-r")
+            shift
+	    UseTask=0
+            ;;
         -*)
             echo "ERROR: Unknown option '$1'"
             exit 1
@@ -101,33 +116,40 @@ while (( $# > 1 )) ; do
     esac
 done
 
-if (( $# != 2 )) ; then
+if (( $# != 3 )) ; then
     Usage
 fi
 
-DestDir="$1"
-JobFile="$2"
+if (( $UseTask == 1 )) ; then
+    ImgData=tfMRI
+else
+    ImgData=rfMRI
+fi
+
+SubjIds="$1"
+DestDir="$2"
+JobFile="$3"
 
 cp /dev/null "$JobFile"
 
-for ((i==0;i<${#dirSubjs[*]};i++)) ; do 
-    SrcDir=${dirSubjs[i]}
-    SrcList=${dirSubjLists[i]}
 
-    for Subj in `cat $SrcList` ; do
-	if [ -f $SrcDir/$Subj/fMRI/tfMRI.fsf ] ; then
+SrcDir=$UKB_SUBJECTS/subjectsAll
+
+for Subj in `cat $SubjIds` ; do
+
+	if [ "$(imtest $SrcDir/$Subj/fMRI/$ImgData)" = 1 ] ; then
+
 	    echo -n "$Subj "
 	    
-	    Npts=$(grep npts $SrcDir/$Subj/fMRI/tfMRI.fsf | tail -1 | awk '{print $3}')
+	    Npts=$(fslnvols $SrcDir/$Subj/fMRI/$ImgData)
 
 	    mkdir -p $DestDir/$Subj/fMRI
-	    ReplTemplate "$SrcDir" "$Subj" "$DestDir" "$FeatTemplate" "$Npts" >> "$JobFile"
+	    ReplTemplate "$SrcDir" "$Subj" "$DestDir" "$FeatTemplate" "$Npts" "$ImgData" >> "$JobFile"
 
 	fi
 	
-    done
-    
 done
+    
 
 echo " "
 
