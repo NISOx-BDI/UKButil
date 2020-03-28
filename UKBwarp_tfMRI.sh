@@ -17,11 +17,11 @@ shopt -s nullglob # No-match globbing expands to null
 Tmp=/tmp/`basename $0`-${$}-
 trap CleanUp INT
 
-if [ "$FSLDIR" == "" ] ; then
-    echo "ERROR: No FSL!"
+# Check for essential env var
+if [[ "$FSLDIR" == "" || "$UKB_SUBJECTS" == "" ]] ; then
+    echo "ERROR: Key env vars, FSLDIR, UKB_SUBJECTS not all set"
     exit 1
 fi
-
 
 # Default interpolation
 Interp="spline"
@@ -34,11 +34,12 @@ Interp="spline"
 
 Usage() {
 cat <<EOF
-Usage: `basename $0` [options] <FeatImg> <DestDir> <JobFile>
+Usage: `basename $0` [options] <SubjIds> <FeatImg> <DestDir> <JobFile>
 
 Creates a job file, to be used with fsl_sub -t, to convert UK Biobank task fMRI 
 from subject-space to MNI space.
 
+   SubjIds   Plain text file listing the subject Ids warp
    FeatImg   File in a feat directory; e.g. mask or stats/cope1
    DestDir   Location of where MNI space files should be put; files named:
                    XXXXXX_tfMRI_<FeatFileNm>_MNI
@@ -48,11 +49,6 @@ from subject-space to MNI space.
 Options
    -i <Interp>   Specify interpolation. Default is "spline"; use "nn" for 
                  masks.
-   -s Subj.txt   Specify subjects (instead of all possible); Subj.txt is text 
-                 file, one Id per line.
-   -S SubjUsed.txt
-                 Search for all possible subjects (as by default) but write 
-                 out list of ID's to SubjUsed.txt; saves time on subsequent runs.
    -d SrcDir     Source directory where UKB image data is found; defaults to 
                  $UKB_SUBJECTS
 _________________________________________________________________________
@@ -60,6 +56,12 @@ Version 1.0
 EOF
 exit
 }
+
+# Unused usage
+   # -S SubjUsed.txt
+   #               Search for all possible subjects (as by default) but write 
+   #               out list of ID's to SubjUsed.txt; saves time on subsequent runs.
+
 
 CleanUp () {
     /bin/rm -f /tmp/`basename $0`-${$}-*
@@ -99,16 +101,11 @@ while (( $# > 1 )) ; do
 	    Interp="$1"
 	    shift
             ;;
-        "-s")
-            shift
-	    SubjIds="$1" 
-	    shift
-            ;;
-        "-S")
-            shift
-	    SubjIdsSv="$1" 
-	    shift
-            ;;
+        # "-S")
+        #     shift
+	#     SubjIdsSv="$1" 
+	#     shift
+        #     ;;
         "-d")
             shift
 	    SrcDir="$1" 
@@ -125,22 +122,23 @@ while (( $# > 1 )) ; do
     esac
 done
 
-if (( $# != 3 )) ; then
+if (( $# != 4 )) ; then
     Usage
 fi
 
-if [ "$SrcDir" == "" ] ; then
-    if [ "$UKB_SUBJECTS" == "" ] ; then
-	echo "ERROR: UKB_SUBJECTS not defined & SrcDir not set with -d"
-	exit 1
+if [ 0 == 1 ] ; then
+
+    if [ "$SrcDir" == "" ] ; then
+	if [ "$UKB_SUBJECTS" == "" ] ; then
+	    echo "ERROR: UKB_SUBJECTS not defined & SrcDir not set with -d"
+	    exit 1
+	fi
+	SrcDir="$UKB_SUBJECTS"    
     fi
-    SrcDir="$UKB_SUBJECTS"    
-fi
-# Make sure no trailing slash
-SrcDir="${SrcDir%/}"
+    # Make sure no trailing slash
+    SrcDir="${SrcDir%/}"
 
-
-if [ "$SubjIds" == "" ] ; then
+    # Code to find all... just not practical
 
     SubjIds=${Tmp}SubjId
 
@@ -159,13 +157,15 @@ if [ "$SubjIds" == "" ] ; then
 	cp "$SubjIds" "$SubjIdsSv"
     fi
 
+else
+    SubjIds="$1"
 fi
 
 nSubj=$(cat $SubjIds | wc -l)
 
-FeatFile="${1%.nii.gz}"
-DestDir="$2"
-JobFile="$3"
+FeatFile="${2%.nii.gz}"
+DestDir="$3"
+JobFile="$4"
 
 touch "$JobFile"
 
