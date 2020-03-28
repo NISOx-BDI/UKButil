@@ -5,8 +5,8 @@ shopt -s nullglob
 featdir=$(grep outputdir "$1"|tail -1|awk '{print $NF}'|sed 's/"//g')
 feat "$1"
 cd "$featdir"
-while [ ! -f rendered_thresh_zfstat1.png ] ; do
-    sleep 60
+while [ ! -f rendered_thresh_zstat1.png ] ; do
+    sleep 120
 done
 sleep 60
 rm -rf tsplot
