@@ -69,7 +69,7 @@ ReplTemplate() {
   local OutFsf="$DestDir"/"$Subj"/fMRI/tfMRI.fsf
 
   sed s%@@SubjDir@@%"$SrcDir"/"$Subj"%';'s%@@OutDir@@%"$OutDir"%';'"s/@@Npts@@/$Npts/" "$Template" > "$OutFsf"
-  echo $UKB_SCRIPTS/feat_then_clean.sh "$OutFsf"
+  echo $UKB_SCRIPTS/UKButil/feat_then_clean.sh "$OutFsf"
 
 }
 
