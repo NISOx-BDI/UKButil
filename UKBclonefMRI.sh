@@ -38,12 +38,12 @@ UseTask=1
 
 Usage() {
 cat <<EOF
-Usage: `basename $0` [options] <SubjId> <DestDir> <JobFile>
+Usage: `basename $0` [options] <SubjIds> <DestDir> <JobFile>
 
 Creates a job file, to be used with fsl_sub -t, to convert UK Biobank task fMRI 
 from subject-space to MNI space.
 
-   SubjId    Plain text file listing the subject Ids to consider (each will
+   SubjIds   Plain text file listing the subject Ids to consider (each will
              be  checked to confirm availablity of data).
    DestDir   Location of root under which to create results in the from 
              where MNI space files should be put; files created will be named:
