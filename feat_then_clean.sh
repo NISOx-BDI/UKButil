@@ -3,6 +3,7 @@
 shopt -s nullglob
 
 featdir=$(grep outputdir "$1"|tail -1|awk '{print $NF}'|sed 's/"//g')
+export FSLSUBALREADYRUN=true
 feat "$1"
 cd "$featdir"
 while [ ! -f rendered_thresh_zstat1.png ] ; do
