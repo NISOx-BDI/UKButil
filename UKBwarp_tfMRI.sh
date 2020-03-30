@@ -167,7 +167,7 @@ FeatFile="${2%.nii.gz}"
 DestDir="$3"
 JobFile="$4"
 
-touch "$JobFile"
+cp /dev/null "$JobFile"
 
 for ((i=1;i<=nSubj;i++)) ; do 
 
