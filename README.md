@@ -5,12 +5,18 @@ Utilities to share between fMRIB and BDI compute environments.
 Set global environmental variable for each site.  In FMRIB:
 
 ```
-export UKB_SUBJECTS=/vols/Scratch/ukbiobank/FMRIB/IMAGING/data3/SubjectsAll
+export UKB_SMS=/vols/Data/ukbiobank/FMRIB/SMS
+export UKB_SUBJECTS=/vols/Data/ukbiobank/FMRIB/IMAGING/data3
+export UKB_SCRIPTS=/vols/Scratch/ukbiobank/nichols/SCRIPTS
+export UKB_TEMPLATES=/vols/Scratch/ukbiobank/nichols/TEMPLATES
 ```
 
 In BDI
 ```
-export UKB_SUBJECTS=/well/win-biobank/projects/ukbiobank/FMRIB/IMAGING/data4/subjects4
+export UKB_SMS=/well/nichols/projects/UKB/SMS
+export UKB_SUBJECTS=/well/win-biobank/projects/imaging/data/data3
+export UKB_SCRIPTS=/well/nichols/scripts
+export UKB_TEMPLATES=/well/nichols/scripts/TEMPLATES
 ```
 
 # Scripts for selecting/processing files
