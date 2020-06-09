@@ -50,7 +50,7 @@ Options
    -i <Interp>   Specify interpolation. Default is "spline"; use "nn" for 
                  masks.
    -d SrcDir     Source directory where UKB image data is found; defaults to 
-                 $UKB_SUBJECTS
+                 $UKB_SUBJECTS/subjectsAll
    -v <Visit>    Imaging visit; defaults to visit 1 (ID prefix 2).
 _________________________________________________________________________
 Version 1.0
@@ -131,17 +131,18 @@ fi
 
 VisID=$((Vis+1))
 
-if [ 0 == 1 ] ; then
-
-    if [ "$SrcDir" == "" ] ; then
-	if [ "$UKB_SUBJECTS" == "" ] ; then
-	    echo "ERROR: UKB_SUBJECTS not defined & SrcDir not set with -d"
-	    exit 1
-	fi
-	SrcDir="$UKB_SUBJECTS"    
+if [ "$SrcDir" == "" ] ; then
+    if [ "$UKB_SUBJECTS" == "" ] ; then
+        echo "ERROR: UKB_SUBJECTS not defined & SrcDir not set with -d"
+        exit 1
     fi
-    # Make sure no trailing slash
-    SrcDir="${SrcDir%/}"
+    SrcDir="$UKB_SUBJECTS/subjectsAll"    
+fi
+
+# Make sure no trailing slash
+SrcDir="${SrcDir%/}"
+
+if [ 0 == 1 ] ; then
 
     # Code to find all... just not practical
 
