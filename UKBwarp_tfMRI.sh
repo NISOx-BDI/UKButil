@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Script:  UKBwarpfMRI
-# Purpose: Warp subject-level fMRI results to MIN space
+# Purpose: Warp subject-level fMRI results to MNI space
 # Author: T. Nichols, F. Alfaro Almagro
 # Version: 1.0
 #
@@ -51,6 +51,7 @@ Options
                  masks.
    -d SrcDir     Source directory where UKB image data is found; defaults to 
                  $UKB_SUBJECTS
+   -v <Visit>    Imaging visit; defaults to visit 1 (ID prefix 2).
 _________________________________________________________________________
 Version 1.0
 EOF
@@ -91,6 +92,8 @@ ApplyWarpJob() {
 #
 ###############################################################################
 
+Vis=1
+
 while (( $# > 1 )) ; do
     case "$1" in
         "-help")
@@ -101,11 +104,11 @@ while (( $# > 1 )) ; do
 	    Interp="$1"
 	    shift
             ;;
-        # "-S")
-        #     shift
-	#     SubjIdsSv="$1" 
-	#     shift
-        #     ;;
+        "-v")
+            shift
+	    Vis="$1" 
+	    shift
+            ;;
         "-d")
             shift
 	    SrcDir="$1" 
@@ -125,6 +128,8 @@ done
 if (( $# != 4 )) ; then
     Usage
 fi
+
+VisID=$((Vis+1))
 
 if [ 0 == 1 ] ; then
 
@@ -173,10 +178,10 @@ for ((i=1;i<=nSubj;i++)) ; do
 
     Subj=$(sed -n ${i}p $SubjIds)
 
-    if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/"$FeatFile".nii.gz ] ; then
-        if [ -f $SrcDir/$Subj/fMRI/tfMRI.feat/reg/example_func2standard_warp.nii.gz ] ; then
+    if [ -f $SrcDir/${VisID}$Subj/fMRI/tfMRI.feat/"$FeatFile".nii.gz ] ; then
+        if [ -f $SrcDir/${VisID}$Subj/fMRI/tfMRI.feat/reg/example_func2standard_warp.nii.gz ] ; then
 		
-		ApplyWarpJob "$SrcDir" "$Subj" "$FeatFile" "$Interp" "$DestDir" >> "$JobFile"
+		ApplyWarpJob "$SrcDir" "${VisID}$Subj" "$FeatFile" "$Interp" "$DestDir" >> "$JobFile"
 
 	fi
     fi
