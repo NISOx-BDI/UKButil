@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # 
 # "Run" script to warp task fMRI images to MNI space, part 1:
 #
@@ -6,18 +6,20 @@
 #
 
 module add fsl
-module add fsl_sub
 
 cd /well/nichols/scripts
 
+IDs=$UKB_SMS/IDs-eid8107_tfMRI-72k.txt
 UKButil=/well/nichols/scripts/UKButil
-Dest=/well/nichols/projects/UKB/MNI
 
-$UKButil/UKBwarp_tfMRI.sh -S IDs_tfMRI.txt       stats/cope1 $Dest Cmd_Warp_tfMRIcope.txt
-fsl_sub -l ~/log -t Cmd_Warp_tfMRIcope.txt
 
-$UKButil/UKBwarp_tfMRI.sh -s IDs_tfMRI.txt -i nn mask        $Dest Cmd_Warp_tfMRImask.txt
-fsl_sub -l ~/log -t Cmd_Warp_tfMRImask.txt
+Dest=/well/nichols/projects/UKB/IMAGING/tfMRI-MNI/cope5
 
-Cnt=$(cat IDs_tfMRI.txt | wc -l)
-mv IDs_tfMRI.txt IDs_tfMRI-${Cnt}.txt
+$UKButil/UKBwarp_tfMRI.sh -v -1        $IDs stats/cope5 $Dest Cmd_Warp_tfMRIcope.txt
+fsl_sub -l ~/logs -t Cmd_Warp_tfMRIcope.txt
+
+
+Dest=/well/nichols/projects/UKB/IMAGING/tfMRI-MNI/mask
+
+$UKButil/UKBwarp_tfMRI.sh -v -1 -i nn  $IDs mask        $Dest Cmd_Warp_tfMRImask.txt
+fsl_sub -l ~/logs -t Cmd_Warp_tfMRImask.txt
