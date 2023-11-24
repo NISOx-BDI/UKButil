@@ -52,6 +52,8 @@ Options
    -d SrcDir     Source directory where UKB image data is found; defaults to 
                  $UKB_SUBJECTS/subjectsAll
    -v <Visit>    Imaging visit; defaults to visit 1 (ID prefix 2).
+                 Specify -1 to indicate that SubjIds alredy have visit
+                 prefix.
 _________________________________________________________________________
 Version 1.0
 EOF
@@ -129,7 +131,11 @@ if (( $# != 4 )) ; then
     Usage
 fi
 
-VisID=$((Vis+1))
+if (( Vis == -1 )) ; then
+    VisID=""
+else
+    VisID=$((Vis+1))
+fi
 
 if [ "$SrcDir" == "" ] ; then
     if [ "$UKB_SUBJECTS" == "" ] ; then
