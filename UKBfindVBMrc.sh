@@ -38,5 +38,5 @@ awk -F'\t' '(NR>1){print $2}' \
     ${tmp}.tsv > \
     ${dirSubjIDsTN}.txt
 
-rm $tmp
+rm ${tmp}.tsv
 
